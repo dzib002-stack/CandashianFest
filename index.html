@@ -759,12 +759,12 @@
 
       const cantidad = nombresArray.length;
 
-      const payload = {
-        nombre: nombresArray.join(', '),
-        acompanantes: cantidad === 1
-          ? '1 persona'
-          : `${cantidad} personas`
-      };
+
+const payload = {
+  nombre: nombresArray.join(', '),
+  acompanantes: cantidad
+};
+
 
       try {
         await fetch(SCRIPT_URL, {
