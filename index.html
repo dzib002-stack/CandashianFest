@@ -873,16 +873,20 @@
     actualizarCuentaRegresiva();
     setInterval(actualizarCuentaRegresiva, 1000);
 
-    // 6. Música navideña ambiental con botón de control (Web Audio API - Cajita Musical)
+    // 6. Música navideña ambiental con botón de activación (Web Audio API - Cajita Musical)
     const btnMusica = document.getElementById('btnMusica');
     const iconoMusica = document.getElementById('iconoMusica');
     const textoMusica = document.getElementById('textoMusica');
 
     let audioCtx = null;
-    let musicaActiva = true;
-    let apagadoManual = false;
+    let musicaActiva = false;
     let timerMusica = null;
     let pasoNota = 0;
+
+    // Estado inicial del botón: solo activar música navideña
+    iconoMusica.textContent = '🔇';
+    textoMusica.textContent = 'Activar Musica Navideña';
+    btnMusica.classList.remove('music-pulse');
 
     // Melodía navideña clásica (Jingle Bells + We Wish You a Merry Christmas en Hz)
     const melodiaNavidena = [
@@ -944,7 +948,7 @@
       timerMusica = setTimeout(reproducirSiguienteNota, nota.d * 1000);
     }
 
-    function iniciarAudioContext() {
+    btnMusica.addEventListener('click', () => {
       if (!audioCtx) {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         audioCtx = new AudioContextClass();
@@ -952,45 +956,15 @@
       if (audioCtx.state === 'suspended') {
         audioCtx.resume();
       }
-      clearTimeout(timerMusica);
-      reproducirSiguienteNota();
-    }
-
-    // Estado inicial marcado como activo
-    iconoMusica.textContent = '🔊';
-    textoMusica.textContent = 'Pausar Musica';
-    btnMusica.classList.add('music-pulse');
-
-    // Arranca automáticamente en el primer toque/clic/tecla del usuario si no lo apagó manualmente
-    function desbloquearMusicaAlInteractuar() {
-      if (musicaActiva && !apagadoManual) {
-        iniciarAudioContext();
-      }
-      document.removeEventListener('pointerdown', desbloquearMusicaAlInteractuar);
-      document.removeEventListener('keydown', desbloquearMusicaAlInteractuar);
-    }
-
-    document.addEventListener('pointerdown', desbloquearMusicaAlInteractuar, { once: true });
-    document.addEventListener('keydown', desbloquearMusicaAlInteractuar, { once: true });
-
-    btnMusica.addEventListener('click', (e) => {
-      e.stopPropagation();
 
       if (!musicaActiva) {
         musicaActiva = true;
-        apagadoManual = false;
-        iconoMusica.textContent = '🔊';
-        textoMusica.textContent = 'Pausar Musica';
-        btnMusica.classList.add('music-pulse');
-        iniciarAudioContext();
-      } else {
-        musicaActiva = false;
-        apagadoManual = true;
-        clearTimeout(timerMusica);
-        iconoMusica.textContent = '🔇';
-        textoMusica.textContent = 'Musica Navideña';
-        btnMusica.classList.remove('music-pulse');
+        reproducirSiguienteNota();
       }
+
+      iconoMusica.textContent = '🔊';
+      textoMusica.textContent = 'Activar Musica Navideña';
+      btnMusica.classList.add('music-pulse');
     });
   </script>
 </body>
