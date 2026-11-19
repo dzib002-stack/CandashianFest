@@ -160,11 +160,21 @@
       100% { opacity: 0.2; transform: translateY(-12px) scale(1.1); }
     }
 
+    /* Botón flotante de música navideña */
+    .music-pulse {
+      animation: musicGlow 1.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes musicGlow {
+      0% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.3); }
+      100% { box-shadow: 0 0 22px rgba(251, 191, 36, 0.75); }
+    }
+
     /* =========================================
        AJUSTES RESPONSIVOS
        ========================================= */
 
-    * {
+- {
       box-sizing: border-box;
     }
 
@@ -196,7 +206,7 @@
     /* Celulares */
     @media (max-width: 640px) {
       body {
-        padding: 48px 12px 20px !important;
+        padding: 48px 12px 72px !important;
         align-items: flex-start !important;
       }
 
@@ -343,7 +353,8 @@
       .santa-arm,
       .santa-wave,
       .bag-sparkle,
-      .cold-mist {
+      .cold-mist,
+      .music-pulse {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
       }
@@ -358,6 +369,13 @@
 
   <!-- Contenedor del fondo animado -->
   <div id="animated-bg" class="fixed inset-0 overflow-hidden pointer-events-none z-0"></div>
+
+  <!-- Botón flotante de Música Navideña -->
+  <button id="btnMusica" type="button" aria-label="Reproducir o pausar música navideña"
+    class="fixed bottom-4 right-4 z-30 flex items-center gap-2 bg-black/80 hover:bg-black/95 text-amber-300 border border-amber-400/60 backdrop-blur-md px-3.5 py-2.5 rounded-full shadow-xl transition active:scale-95 text-xs font-bold uppercase tracking-wider">
+    <span id="iconoMusica" class="text-base leading-none">🔇</span>
+    <span id="textoMusica">Musica Navideña</span>
+  </button>
 
   <!-- Contenedor Principal -->
   <div class="max-w-5xl w-full flex flex-col lg:flex-row items-center justify-center gap-6 relative z-10 my-auto">
@@ -394,6 +412,31 @@
             <span class="text-gray-100 text-xs block">
               Casa de LadyPirix, domicilio conocido
             </span>
+          </div>
+        </div>
+
+        <!-- CUENTA REGRESIVA EN VIVO -->
+        <div class="bg-black/65 rounded-2xl p-3.5 mt-3 border border-amber-500/35 shadow-inner">
+          <span id="countdownTitulo" class="block text-[10px] uppercase tracking-widest text-amber-300 font-bold mb-2">
+            Faltan para el inicio
+          </span>
+          <div id="countdownGrid" class="grid grid-cols-4 gap-2 text-center">
+            <div class="bg-red-950/80 border border-amber-400/30 rounded-xl py-2 px-1">
+              <span id="cdDias" class="block text-lg sm:text-xl font-black text-amber-400 leading-none">00</span>
+              <span class="block text-[9px] uppercase tracking-wider text-gray-300 mt-1">Dias</span>
+            </div>
+            <div class="bg-red-950/80 border border-amber-400/30 rounded-xl py-2 px-1">
+              <span id="cdHoras" class="block text-lg sm:text-xl font-black text-amber-400 leading-none">00</span>
+              <span class="block text-[9px] uppercase tracking-wider text-gray-300 mt-1">Horas</span>
+            </div>
+            <div class="bg-red-950/80 border border-amber-400/30 rounded-xl py-2 px-1">
+              <span id="cdMinutos" class="block text-lg sm:text-xl font-black text-amber-400 leading-none">00</span>
+              <span class="block text-[9px] uppercase tracking-wider text-gray-300 mt-1">Min</span>
+            </div>
+            <div class="bg-red-950/80 border border-amber-400/30 rounded-xl py-2 px-1">
+              <span id="cdSegundos" class="block text-lg sm:text-xl font-black text-amber-400 leading-none">00</span>
+              <span class="block text-[9px] uppercase tracking-wider text-gray-300 mt-1">Seg</span>
+            </div>
           </div>
         </div>
       </div>
@@ -574,6 +617,7 @@
   <script>
     // PEGA AQUÍ LA URL DE TU GOOGLE APPS SCRIPT
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8_UMJyGb5kfV6H6jckkqQkvBK8zNplqdsZfVt2VePitTcEbYEcurMzsMYsjknVxeYxA/exec";
+
     // 1. Generar serie de luces navideñas superiores
     const strand = document.getElementById('light-strand');
 
@@ -759,12 +803,10 @@
 
       const cantidad = nombresArray.length;
 
-
-const payload = {
-  nombre: nombresArray.join(', '),
-  acompanantes: cantidad
-};
-
+      const payload = {
+        nombre: nombresArray.join(', '),
+        acompanantes: cantidad
+      };
 
       try {
         await fetch(SCRIPT_URL, {
@@ -793,6 +835,164 @@ const payload = {
     });
 
     cargarConfirmados();
+
+    // 5. Cuenta regresiva en vivo (Viernes 18 de Diciembre 2026 • 20:00 hrs)
+    const fechaEvento = new Date(2026, 11, 18, 20, 0, 0).getTime();
+    const cdDias = document.getElementById('cdDias');
+    const cdHoras = document.getElementById('cdHoras');
+    const cdMinutos = document.getElementById('cdMinutos');
+    const cdSegundos = document.getElementById('cdSegundos');
+    const countdownTitulo = document.getElementById('countdownTitulo');
+    const countdownGrid = document.getElementById('countdownGrid');
+
+    function actualizarCuentaRegresiva() {
+      const ahora = Date.now();
+      const diferencia = fechaEvento - ahora;
+
+      if (diferencia <= 0) {
+        countdownTitulo.textContent = '¡La fiesta ya comenzo!';
+        countdownGrid.innerHTML = `
+          <div class="col-span-4 bg-gradient-to-r from-amber-500/20 to-red-900/40 border border-amber-400/40 rounded-xl py-2.5 px-3 text-amber-300 font-extrabold text-xs uppercase tracking-wider">
+            ¡Bienvenido al Candashian Fest!
+          </div>
+        `;
+        return;
+      }
+
+      const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+      const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+      const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
+
+      cdDias.textContent = String(dias).padStart(2, '0');
+      cdHoras.textContent = String(horas).padStart(2, '0');
+      cdMinutos.textContent = String(minutos).padStart(2, '0');
+      cdSegundos.textContent = String(segundos).padStart(2, '0');
+    }
+
+    actualizarCuentaRegresiva();
+    setInterval(actualizarCuentaRegresiva, 1000);
+
+    // 6. Música navideña ambiental con botón de control (Web Audio API - Cajita Musical)
+    const btnMusica = document.getElementById('btnMusica');
+    const iconoMusica = document.getElementById('iconoMusica');
+    const textoMusica = document.getElementById('textoMusica');
+
+    let audioCtx = null;
+    let musicaActiva = true;
+    let apagadoManual = false;
+    let timerMusica = null;
+    let pasoNota = 0;
+
+    // Melodía navideña clásica (Jingle Bells + We Wish You a Merry Christmas en Hz)
+    const melodiaNavidena = [
+      // Jingle Bells
+      { f: 659.25, d: 0.25 }, { f: 659.25, d: 0.25 }, { f: 659.25, d: 0.5 },
+      { f: 659.25, d: 0.25 }, { f: 659.25, d: 0.25 }, { f: 659.25, d: 0.5 },
+      { f: 659.25, d: 0.25 }, { f: 783.99, d: 0.25 }, { f: 523.25, d: 0.35 }, { f: 587.33, d: 0.15 }, { f: 659.25, d: 0.8 },
+      { f: 698.46, d: 0.25 }, { f: 698.46, d: 0.25 }, { f: 698.46, d: 0.35 }, { f: 698.46, d: 0.15 },
+      { f: 698.46, d: 0.25 }, { f: 659.25, d: 0.25 }, { f: 659.25, d: 0.25 }, { f: 659.25, d: 0.25 },
+      { f: 659.25, d: 0.25 }, { f: 587.33, d: 0.25 }, { f: 587.33, d: 0.25 }, { f: 659.25, d: 0.25 }, { f: 587.33, d: 0.5 }, { f: 783.99, d: 0.6 },
+      // Pausa breve
+      { f: 0, d: 0.4 },
+      // We Wish You a Merry Christmas
+      { f: 523.25, d: 0.3 }, { f: 698.46, d: 0.3 }, { f: 698.46, d: 0.15 }, { f: 783.99, d: 0.15 }, { f: 698.46, d: 0.15 }, { f: 659.25, d: 0.15 },
+      { f: 587.33, d: 0.3 }, { f: 587.33, d: 0.3 }, { f: 587.33, d: 0.3 },
+      { f: 783.99, d: 0.3 }, { f: 783.99, d: 0.15 }, { f: 880.00, d: 0.15 }, { f: 783.99, d: 0.15 }, { f: 698.46, d: 0.15 },
+      { f: 659.25, d: 0.3 }, { f: 523.25, d: 0.3 }, { f: 523.25, d: 0.3 },
+      { f: 880.00, d: 0.3 }, { f: 880.00, d: 0.15 }, { f: 987.77, d: 0.15 }, { f: 880.00, d: 0.15 }, { f: 783.99, d: 0.15 },
+      { f: 698.46, d: 0.3 }, { f: 587.33, d: 0.3 }, { f: 523.25, d: 0.15 }, { f: 523.25, d: 0.15 },
+      { f: 587.33, d: 0.3 }, { f: 783.99, d: 0.3 }, { f: 659.25, d: 0.3 }, { f: 698.46, d: 0.8 },
+      { f: 0, d: 0.6 }
+    ];
+
+    function tocarCampana(frecuencia, duracion) {
+      if (!audioCtx || frecuencia === 0) return;
+
+      const ahora = audioCtx.currentTime;
+      const oscPrincipal = audioCtx.createOscillator();
+      const oscArmonico = audioCtx.createOscillator();
+      const ganancia = audioCtx.createGain();
+
+      oscPrincipal.type = 'sine';
+      oscPrincipal.frequency.setValueAtTime(frecuencia, ahora);
+
+      oscArmonico.type = 'triangle';
+      oscArmonico.frequency.setValueAtTime(frecuencia * 2, ahora);
+
+      ganancia.gain.setValueAtTime(0.001, ahora);
+      ganancia.gain.exponentialRampToValueAtTime(0.08, ahora + 0.02);
+      ganancia.gain.exponentialRampToValueAtTime(0.0008, ahora + duracion + 0.35);
+
+      oscPrincipal.connect(ganancia);
+      oscArmonico.connect(ganancia);
+      ganancia.connect(audioCtx.destination);
+
+      oscPrincipal.start(ahora);
+      oscArmonico.start(ahora);
+      oscPrincipal.stop(ahora + duracion + 0.4);
+      oscArmonico.stop(ahora + duracion + 0.4);
+    }
+
+    function reproducirSiguienteNota() {
+      if (!musicaActiva) return;
+
+      const nota = melodiaNavidena[pasoNota];
+      tocarCampana(nota.f, nota.d);
+
+      pasoNota = (pasoNota + 1) % melodiaNavidena.length;
+      timerMusica = setTimeout(reproducirSiguienteNota, nota.d * 1000);
+    }
+
+    function iniciarAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      clearTimeout(timerMusica);
+      reproducirSiguienteNota();
+    }
+
+    // Estado inicial marcado como activo
+    iconoMusica.textContent = '🔊';
+    textoMusica.textContent = 'Pausar Musica';
+    btnMusica.classList.add('music-pulse');
+
+    // Arranca automáticamente en el primer toque/clic/tecla del usuario si no lo apagó manualmente
+    function desbloquearMusicaAlInteractuar() {
+      if (musicaActiva && !apagadoManual) {
+        iniciarAudioContext();
+      }
+      document.removeEventListener('pointerdown', desbloquearMusicaAlInteractuar);
+      document.removeEventListener('keydown', desbloquearMusicaAlInteractuar);
+    }
+
+    document.addEventListener('pointerdown', desbloquearMusicaAlInteractuar, { once: true });
+    document.addEventListener('keydown', desbloquearMusicaAlInteractuar, { once: true });
+
+    btnMusica.addEventListener('click', (e) => {
+      e.stopPropagation();
+
+      if (!musicaActiva) {
+        musicaActiva = true;
+        apagadoManual = false;
+        iconoMusica.textContent = '🔊';
+        textoMusica.textContent = 'Pausar Musica';
+        btnMusica.classList.add('music-pulse');
+        iniciarAudioContext();
+      } else {
+        musicaActiva = false;
+        apagadoManual = true;
+        clearTimeout(timerMusica);
+        iconoMusica.textContent = '🔇';
+        textoMusica.textContent = 'Musica Navideña';
+        btnMusica.classList.remove('music-pulse');
+      }
+    });
   </script>
 </body>
+
 </html>
